@@ -1,41 +1,31 @@
-name: Build Extension
+name: Build BetaAdmob AIX
 
 on:
   push:
-    branches: [ master, main ]
-  workflow_dispatch:
+    branches: [ main, master ]
+  workflow_dispatch: 
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repositori beserta submodule
-      - name: Checkout Repository with Submodules
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive # Menarik submodules library appinventor
 
-      # 2. Setup Java JDK 8
-      - name: Set up JDK 8
-        uses: actions/setup-java@v4
-        with:
-          java-version: '8'
-          distribution: 'temurin'
+    - name: Set up JDK 8
+      uses: actions/setup-java@v4
+      with:
+        java-version: '8'
+        distribution: 'temurin'
 
-      # 3. Jalankan skrip update-deps
-      - name: Update Dependencies
-        run: |
-          chmod +x update-deps.sh
-          ./update-deps.sh
+    - name: Build Extension with Ant
+      run: ant extensions
 
-      # 4. Jalankan Ant Build
-      - name: Build Extension with Ant
-        run: ant
-
-      # 5. Upload hasil berkas .aix (Update v3 -> v4)
-      - name: Upload AIX Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: BetaAdmob-extension
-          path: out/*.aix
+    - name: Upload AIX Result
+      uses: actions/upload-artifact@v4
+      with:
+        name: BetaAdmob-Extension
+        path: out/*.aix
