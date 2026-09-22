@@ -15,7 +15,7 @@ import com.google.android.gms.ads.initialization.OnInitializationCompleteListene
     description = "BetaAdmob Engine Component oleh alimahrus25",
     category = ComponentCategory.EXTENSION,
     nonVisible = true,
-    iconName = "aiwebres/extension.png"
+    iconName = "assets/admob.png"
 )
 @SimpleObject(external = true)
 @UsesLibraries(libraries = "play-services-ads.jar, play-services-ads-lite.jar, play-services-basement.jar, play-services-tasks.jar, play-services-ads-identifier.jar")
