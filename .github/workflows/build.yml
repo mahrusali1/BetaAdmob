@@ -11,17 +11,28 @@ jobs:
 
     steps:
 
+    # ==========================================
+    # 1. Checkout Repository
+    # ==========================================
     - name: Checkout Repository
       uses: actions/checkout@v4
       with:
         submodules: recursive
 
+
+    # ==========================================
+    # 2. Setup Java 8
+    # ==========================================
     - name: Set up JDK 8
       uses: actions/setup-java@v4
       with:
         java-version: '8'
         distribution: 'temurin'
 
+
+    # ==========================================
+    # 3. Download AdMob Libraries
+    # ==========================================
     - name: Download AdMob Libraries
       shell: bash
       run: |
@@ -30,56 +41,66 @@ jobs:
         mkdir -p lib/deps
         cd lib/deps
 
-        echo "=== Download play-services-ads ==="
+        echo "======================================"
+        echo "Download play-services-ads"
+        echo "======================================"
+
         curl -fL --retry 3 \
           "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads/22.6.0/play-services-ads-22.6.0.aar" \
           -o ads.aar
 
-        echo "=== Extract play-services-ads ==="
         unzip -o ads.aar classes.jar
         mv classes.jar play-services-ads.jar
         rm ads.aar
 
 
-        echo "=== Download play-services-ads-lite ==="
+        echo "======================================"
+        echo "Download play-services-ads-lite"
+        echo "======================================"
+
         curl -fL --retry 3 \
           "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads-lite/22.6.0/play-services-ads-lite-22.6.0.aar" \
           -o ads-lite.aar
 
-        echo "=== Extract play-services-ads-lite ==="
         unzip -o ads-lite.aar classes.jar
         mv classes.jar play-services-ads-lite.jar
         rm ads-lite.aar
 
 
-        echo "=== Download play-services-basement ==="
+        echo "======================================"
+        echo "Download play-services-basement"
+        echo "======================================"
+
         curl -fL --retry 3 \
           "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-basement/18.2.0/play-services-basement-18.2.0.aar" \
           -o basement.aar
 
-        echo "=== Extract play-services-basement ==="
         unzip -o basement.aar classes.jar
         mv classes.jar play-services-basement.jar
         rm basement.aar
 
 
-        echo "=== Download play-services-tasks ==="
+        echo "======================================"
+        echo "Download play-services-tasks"
+        echo "======================================"
+
         curl -fL --retry 3 \
           "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-tasks/18.0.2/play-services-tasks-18.0.2.aar" \
           -o tasks.aar
 
-        echo "=== Extract play-services-tasks ==="
         unzip -o tasks.aar classes.jar
         mv classes.jar play-services-tasks.jar
         rm tasks.aar
 
 
-        echo "=== Download play-services-ads-identifier ==="
+        echo "======================================"
+        echo "Download play-services-ads-identifier"
+        echo "======================================"
+
         curl -fL --retry 3 \
           "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads-identifier/18.0.1/play-services-ads-identifier-18.0.1.aar" \
           -o identifier.aar
 
-        echo "=== Extract play-services-ads-identifier ==="
         unzip -o identifier.aar classes.jar
         mv classes.jar play-services-ads-identifier.jar
         rm identifier.aar
@@ -87,7 +108,7 @@ jobs:
 
         echo ""
         echo "======================================"
-        echo "AdMob libraries successfully downloaded"
+        echo "SEMUA LIBRARY ADMob SELESAI"
         echo "======================================"
 
         ls -lh
@@ -95,19 +116,29 @@ jobs:
         cd ../..
 
 
-    - name: Build Extension with ProGuard
+    # ==========================================
+    # 4. Build Extension
+    # ==========================================
+    - name: Build Extension
       run: |
-        ant extensions -Dproguard=1
+        ant extensions
 
 
+    # ==========================================
+    # 5. Cek AIX
+    # ==========================================
     - name: Show Generated AIX
       run: |
         echo "======================================"
         echo "Generated AIX:"
         echo "======================================"
+
         ls -lh out/*.aix
 
 
+    # ==========================================
+    # 6. Upload AIX
+    # ==========================================
     - name: Upload AIX Artifact
       uses: actions/upload-artifact@v4
       with:
