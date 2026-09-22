@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
     - name: Checkout Repository
       uses: actions/checkout@v4
       with:
@@ -26,35 +27,47 @@ jobs:
         mkdir -p lib/deps
         cd lib/deps
 
-        wget -q https://repo1.maven.org/maven2/com/google/android/gms/play-services-ads-lite/22.6.0/play-services-ads-lite-22.6.0.aar -O ads-lite.zip
-        unzip -o ads-lite.zip classes.jar
+        wget -q https://repo.maven.apache.org/maven2/com/google/android/gms/play-services-ads-lite/22.6.0/play-services-ads-lite-22.6.0.aar -O ads-lite.aar
+        unzip -o ads-lite.aar classes.jar
         mv classes.jar play-services-ads-lite.jar
-        rm ads-lite.zip
+        rm ads-lite.aar
 
-        wget -q https://repo1.maven.org/maven2/com/google/android/gms/play-services-ads/22.6.0/play-services-ads-22.6.0.aar -O ads.zip
-        unzip -o ads.zip classes.jar
+        wget -q https://repo.maven.apache.org/maven2/com/google/android/gms/play-services-ads/22.6.0/play-services-ads-22.6.0.aar -O ads.aar
+        unzip -o ads.aar classes.jar
         mv classes.jar play-services-ads.jar
-        rm ads.zip
+        rm ads.aar
 
-        wget -q https://repo1.maven.org/maven2/com/google/android/gms/play-services-basement/18.2.0/play-services-basement-18.2.0.aar -O basement.zip
-        unzip -o basement.zip classes.jar
+        wget -q https://repo.maven.apache.org/maven2/com/google/android/gms/play-services-basement/18.2.0/play-services-basement-18.2.0.aar -O basement.aar
+        unzip -o basement.aar classes.jar
         mv classes.jar play-services-basement.jar
-        rm basement.zip
+        rm basement.aar
 
-        wget -q https://repo1.maven.org/maven2/com/google/android/gms/play-services-tasks/18.0.2/play-services-tasks-18.0.2.aar -O tasks.zip
-        unzip -o tasks.zip classes.jar
+        wget -q https://repo.maven.apache.org/maven2/com/google/android/gms/play-services-tasks/18.0.2/play-services-tasks-18.0.2.aar -O tasks.aar
+        unzip -o tasks.aar classes.jar
         mv classes.jar play-services-tasks.jar
-        rm tasks.zip
+        rm tasks.aar
 
-        wget -q https://repo1.maven.org/maven2/com/google/android/gms/play-services-ads-identifier/18.0.1/play-services-ads-identifier-18.0.1.aar -O id.zip
-        unzip -o id.zip classes.jar
+        wget -q https://repo.maven.apache.org/maven2/com/google/android/gms/play-services-ads-identifier/18.0.1/play-services-ads-identifier-18.0.1.aar -O identifier.aar
+        unzip -o identifier.aar classes.jar
         mv classes.jar play-services-ads-identifier.jar
-        rm id.zip
+        rm identifier.aar
 
         cd ../..
 
+    - name: Show AdMob Libraries
+      run: |
+        echo "=== AdMob libraries ==="
+        ls -lh lib/deps
+        echo "======================"
+
     - name: Build Extension with ProGuard
       run: ant extensions -Dproguard=1
+
+    - name: Show Generated AIX
+      run: |
+        echo "=== Generated AIX ==="
+        ls -lh out/*.aix
+        echo "===================="
 
     - name: Upload AIX Artifact
       uses: actions/upload-artifact@v4
