@@ -22,52 +22,91 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
 
-    - name: Download AdMob Libraries to lib/deps
+    - name: Download AdMob Libraries
+      shell: bash
       run: |
+        set -e
+
         mkdir -p lib/deps
         cd lib/deps
 
-        wget -q https://repo.maven.apache.org/maven2/com/google/android/gms/play-services-ads-lite/22.6.0/play-services-ads-lite-22.6.0.aar -O ads-lite.aar
-        unzip -o ads-lite.aar classes.jar
-        mv classes.jar play-services-ads-lite.jar
-        rm ads-lite.aar
+        echo "=== Download play-services-ads ==="
+        curl -fL --retry 3 \
+          "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads/22.6.0/play-services-ads-22.6.0.aar" \
+          -o ads.aar
 
-        wget -q https://repo.maven.apache.org/maven2/com/google/android/gms/play-services-ads/22.6.0/play-services-ads-22.6.0.aar -O ads.aar
+        echo "=== Extract play-services-ads ==="
         unzip -o ads.aar classes.jar
         mv classes.jar play-services-ads.jar
         rm ads.aar
 
-        wget -q https://repo.maven.apache.org/maven2/com/google/android/gms/play-services-basement/18.2.0/play-services-basement-18.2.0.aar -O basement.aar
+
+        echo "=== Download play-services-ads-lite ==="
+        curl -fL --retry 3 \
+          "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads-lite/22.6.0/play-services-ads-lite-22.6.0.aar" \
+          -o ads-lite.aar
+
+        echo "=== Extract play-services-ads-lite ==="
+        unzip -o ads-lite.aar classes.jar
+        mv classes.jar play-services-ads-lite.jar
+        rm ads-lite.aar
+
+
+        echo "=== Download play-services-basement ==="
+        curl -fL --retry 3 \
+          "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-basement/18.2.0/play-services-basement-18.2.0.aar" \
+          -o basement.aar
+
+        echo "=== Extract play-services-basement ==="
         unzip -o basement.aar classes.jar
         mv classes.jar play-services-basement.jar
         rm basement.aar
 
-        wget -q https://repo.maven.apache.org/maven2/com/google/android/gms/play-services-tasks/18.0.2/play-services-tasks-18.0.2.aar -O tasks.aar
+
+        echo "=== Download play-services-tasks ==="
+        curl -fL --retry 3 \
+          "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-tasks/18.0.2/play-services-tasks-18.0.2.aar" \
+          -o tasks.aar
+
+        echo "=== Extract play-services-tasks ==="
         unzip -o tasks.aar classes.jar
         mv classes.jar play-services-tasks.jar
         rm tasks.aar
 
-        wget -q https://repo.maven.apache.org/maven2/com/google/android/gms/play-services-ads-identifier/18.0.1/play-services-ads-identifier-18.0.1.aar -O identifier.aar
+
+        echo "=== Download play-services-ads-identifier ==="
+        curl -fL --retry 3 \
+          "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads-identifier/18.0.1/play-services-ads-identifier-18.0.1.aar" \
+          -o identifier.aar
+
+        echo "=== Extract play-services-ads-identifier ==="
         unzip -o identifier.aar classes.jar
         mv classes.jar play-services-ads-identifier.jar
         rm identifier.aar
 
+
+        echo ""
+        echo "======================================"
+        echo "AdMob libraries successfully downloaded"
+        echo "======================================"
+
+        ls -lh
+
         cd ../..
 
-    - name: Show AdMob Libraries
-      run: |
-        echo "=== AdMob libraries ==="
-        ls -lh lib/deps
-        echo "======================"
 
     - name: Build Extension with ProGuard
-      run: ant extensions -Dproguard=1
+      run: |
+        ant extensions -Dproguard=1
+
 
     - name: Show Generated AIX
       run: |
-        echo "=== Generated AIX ==="
+        echo "======================================"
+        echo "Generated AIX:"
+        echo "======================================"
         ls -lh out/*.aix
-        echo "===================="
+
 
     - name: Upload AIX Artifact
       uses: actions/upload-artifact@v4
