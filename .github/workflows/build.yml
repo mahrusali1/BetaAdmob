@@ -3,7 +3,7 @@ name: Build BetaAdmob AIX
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,8 +21,7 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
 
-    # BARIS BARU: Mengunduh library AdMob otomatis jika belum tersedia di lib/deps
-    - name: Download AdMob Libraries
+    - name: Download AdMob Libraries to lib/deps
       run: |
         mkdir -p lib/deps
         cd lib/deps
@@ -33,10 +32,10 @@ jobs:
         wget -q https://repo1.maven.org/maven2/com/google/android/gms/play-services-ads-identifier/18.0.1/play-services-ads-identifier-18.0.1.aar -O id.zip && unzip -o id.zip classes.jar && mv classes.jar play-services-ads-identifier.jar && rm id.zip
         cd ../..
 
-    - name: Build Extension with Ant
+    - name: Build Extension
       run: ant extensions
 
-    - name: Upload AIX Result
+    - name: Upload AIX Artifact
       uses: actions/upload-artifact@v4
       with:
         name: BetaAdmob-Extension
