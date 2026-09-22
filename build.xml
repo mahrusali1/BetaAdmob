@@ -1,73 +1,226 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <project name="BetaAdmob" default="all">
 
-    <!-- Property Direktori Utama -->
-    <property name="src.dir" location="src" />
-    <property name="lib.dir" location="lib" />
-    <property name="build.dir" location="build" />
-    <property name="classes.dir" location="${build.dir}/classes" />
-    <property name="external.dir" location="${build.dir}/externalComponents" />
-    <property name="external.classes.dir" location="${build.dir}/externalComponents-classes" />
-    <property name="out.dir" location="out" />
+  <!-- Properti Package Utama -->
+  <property name="extension.pkg" value="com.alimahrus25.betaadmob" />
+  
+  <!-- Direktori Output & Build -->
+  <property name="Extensions.dir" location="out" />
+  <property name="AndroidRuntime-classes.dir" location="build/classes"/>
+  <property name="ExternalComponent.dir" location="build/externalComponents" />
+  <property name="ExternalComponent-class.dir" location="build/externalComponents-classes" />
 
-    <!-- Classpath untuk Membaca Seluruh JAR di Folder lib/ dan Sub-foldernya -->
-    <path id="classpath">
-        <fileset dir="${lib.dir}">
-            <include name="**/*.jar" />
+  <!-- Target Utama -->
+  <target name="all" depends="extensions">
+  </target>
+
+  <!-- Target Pembersihan -->
+  <target name="clean">
+    <delete dir="build" />
+    <delete dir="out" />
+  </target>
+
+  <!-- Target Inisialisasi Direktori -->
+  <target name="init" depends="clean">
+    <mkdir dir="build" />
+    <mkdir dir="${AndroidRuntime-classes.dir}" />
+    <mkdir dir="${ExternalComponent.dir}" />
+    <mkdir dir="${ExternalComponent-class.dir}" />
+    <mkdir dir="${Extensions.dir}" />
+  </target>
+
+  <!-- Definisi Task Ant-Contrib -->
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+    <classpath>
+      <pathelement location="lib/ant-contrib/ant-contrib-1.0b3.jar"/>
+    </classpath>
+  </taskdef>
+
+  <!-- Kompilasi Class Helper (Jika Ada) -->
+  <target name="javac.helpers" depends="init">
+    <mkdir dir="${AndroidRuntime-classes.dir}" />
+    <depend srcdir="src" destdir="${AndroidRuntime-classes.dir}">
+      <include name="**/helpers/*.java" />
+    </depend>
+    <javac target="1.8" source="1.8" destdir="${AndroidRuntime-classes.dir}" srcdir="src" encoding="utf-8"
+           includeantruntime="false">
+      <classpath>
+        <fileset dir="lib/appinventor">
+          <include name="*.jar" />
         </fileset>
-    </path>
+        <fileset dir="lib/deps">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      <include name="**/helpers/*.java" />
+    </javac>
+  </target>
 
-    <!-- Cleaning Output -->
-    <target name="clean">
-        <delete dir="${build.dir}" />
-        <delete dir="${out.dir}" />
-    </target>
+  <!-- Kompilasi Kode Java Utama -->
+  <target name="javac" depends="javac.helpers">
+    <mkdir dir="${AndroidRuntime-classes.dir}" />
+    <depend srcdir="src" destdir="${AndroidRuntime-classes.dir}">
+      <include name="**/*.java" />
+      <exclude name="**/helpers/*.java" />
+    </depend>
+    <javac target="1.8" source="1.8" destdir="${AndroidRuntime-classes.dir}" srcdir="src" encoding="utf-8"
+           includeantruntime="false">
+      <classpath>
+        <fileset dir="lib/appinventor">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="lib/deps">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      <include name="**/*.java" />
+      <exclude name="**/helpers/*.java" />
+    </javac>
+  </target>
 
-    <!-- Inisialisasi Folder -->
-    <target name="init">
-        <mkdir dir="${build.dir}" />
-        <mkdir dir="${classes.dir}" />
-        <mkdir dir="${external.dir}" />
-        <mkdir dir="${external.classes.dir}" />
-        <mkdir dir="${out.dir}" />
-    </target>
+  <!-- Proses External Component Generator -->
+  <target name="process" depends="javac">
+    <mkdir dir="${Extensions.dir}" />
+    <mkdir dir="${ExternalComponent.dir}" />
+    <mkdir dir="${ExternalComponent-class.dir}" />
+    <java failonerror="true" classname="com.google.appinventor.components.scripts.ExternalComponentGenerator">
+      <classpath>
+        <pathelement location="lib/appinventor/AnnotationProcessors.jar" />
+      </classpath>
+      <arg path="${AndroidRuntime-classes.dir}/simple_components.json" />
+      <arg path="${AndroidRuntime-classes.dir}/simple_components_build_info.json" />
+      <arg path="${ExternalComponent.dir}" />
+      <arg path="${AndroidRuntime-classes.dir}" />
+      <arg path="lib/deps" />
+      <arg path="${ExternalComponent-class.dir}" />
+      <arg value="false" />
+    </java>
+  </target>
 
-    <!-- Kompilasi Sumber Daya Java (Javac) -->
-    <target name="javac" depends="init">
-        <javac srcdir="${src.dir}" 
-               destdir="${classes.dir}" 
-               includeantruntime="false"
-               encoding="UTF-8"
-               source="1.8"
-               target="1.8">
-            <classpath refid="classpath" />
-        </javac>
-    </target>
+  <!-- Ekstraksi Library JAR Dependensi -->
+  <target name="unjarAllExtensionLibraries">
+    <foreach target="unjarExtensionLibraries" param="extension" inheritall="true">
+      <path>
+        <dirset dir="build/externalComponents-classes">
+          <include name="*" />
+        </dirset>
+      </path>
+    </foreach>
+  </target>
 
-    <!-- Generasi Komponen Ekstensi (.aix) -->
-    <target name="process" depends="javac">
-        <!-- Menjalankan ExternalComponentGenerator dari App Inventor -->
-        <java classname="com.google.appinventor.components.scripts.ExternalComponentGenerator" 
-              fork="true" 
-              failonerror="true">
-            <classpath refid="classpath" />
-            <arg value="${classes.dir}" />
-            <arg value="${external.dir}" />
-            <arg value="${external.classes.dir}" />
-            <arg value="${lib.dir}" />
-        </java>
+  <target name="unjarExtensionLibraries">
+    <basename property="extensionClassFolder" file="${extension}" />
+    <unzip dest="build/externalComponents-classes/${extensionClassFolder}">
+      <fileset dir="build/externalComponents-classes/${extensionClassFolder}">
+        <include name="**/*.jar" />
+      </fileset>
+    </unzip>
+  </target>
 
-        <!-- Menyalin Hasil AIX ke Folder out/ -->
-        <copy todir="${out.dir}">
-            <fileset dir="${external.dir}">
-                <include name="**/*.aix" />
-            </fileset>
-        </copy>
-    </target>
+  <!-- Pembuatan Jar Ekstensi & AndroidRuntime.jar -->
+  <target name="jarAllExtensions" depends="process,unjarAllExtensionLibraries" >
+    <foreach target="jarExtension" param="extension" inheritall="true">
+      <path>
+        <dirset dir="${ExternalComponent-class.dir}">
+          <include name="*" />
+        </dirset>
+      </path>
+    </foreach>
+  </target>
 
-    <!-- Target Utama -->
-    <target name="all" depends="clean, process">
-        <echo message="Build Selesai! Berkas AIX tersimpan di folder out/" />
-    </target>
+  <target name="jarExtension">
+    <basename property="extensionClassFolder" file="${extension}" />
+    <jar destfile="${ExternalComponent-class.dir}/${extensionClassFolder}.jar"
+         basedir="${ExternalComponent-class.dir}/${extensionClassFolder}"
+         includes="**/*.class"
+         excludes="*.jar" />
+    <antcall target="ProGuard">
+      <param name="extensionClassFolder" value="${extensionClassFolder}" />
+    </antcall>
+    <copy file="${ExternalComponent-class.dir}/${extensionClassFolder}.jar"
+          tofile="${ExternalComponent.dir}/${extensionClassFolder}/files/AndroidRuntime.jar"/>
+    <echo>Generated build file AndroidRuntime.jar [${extensionClassFolder}]</echo>
+  </target>
+
+  <!-- Pembuatan classes.jar (Dexing) -->
+  <target name="dexAllExtensions" depends="jarAllExtensions">
+    <foreach target="dexExtension" param="extension">
+      <path>
+        <fileset dir="${ExternalComponent-class.dir}" >
+          <include name="*.jar"/>
+        </fileset>
+      </path>
+    </foreach>
+  </target>
+
+  <target name="dexExtension" depends="">
+    <basename property="extensionType" file="${extension}" suffix=".jar"/>
+    <java jar="lib/appinventor/dx.jar"
+          fork="true"
+          failonerror="true">
+      <arg value="--dex"/>
+      <arg value="--no-strict"/>
+      <arg value="--output"/>
+      <arg value="${ExternalComponent.dir}/${extensionType}/classes.jar"/>
+      <arg value="${ExternalComponent-class.dir}/${extensionType}.jar"/>
+    </java>
+    <echo>Dexing extension: ${extensionType}</echo>
+  </target>
+
+  <!-- Pengemasan Berkas .aix -->
+  <target name="packExtension">
+    <basename property="extensionType" file="${extension}" />
+    <zip destfile="${Extensions.dir}/${extensionType}.aix"
+         basedir="${ExternalComponent.dir}"
+         includes="${extensionType}/"
+    />
+  </target>
+
+  <target name="extensions" depends="jarAllExtensions, dexAllExtensions">
+    <mkdir dir="${Extensions.dir}" />
+    <foreach target="packExtension" param="extension" inheritall="true">
+      <path>
+        <dirset dir="${ExternalComponent.dir}">
+          <include name="*" />
+        </dirset>
+      </path>
+    </foreach>
+  </target>
+
+  <!-- Optimasi ProGuard (Jika Diaktifkan) -->
+  <condition property="skipProguard">
+    <not>
+      <equals arg1="${proguard}" arg2="1" />
+    </not>
+  </condition>
+
+  <target name="ProGuard" unless="skipProguard">
+    <taskdef resource="proguard/ant/task.properties"
+             classpath="lib/proguard/proguard.jar" />
+    <proguard printmapping="out/${extensionClassFolder}-proguard.map"
+              overloadaggressively="on"
+              configuration="lib/proguard/proguard.cfg"
+              ignorewarnings="false">
+
+      <injar  file="${ExternalComponent-class.dir}/${extensionClassFolder}.jar" />
+      <outjar file="${ExternalComponent-class.dir}/${extensionClassFolder}_p.jar" />
+
+      <libraryjar>
+        <fileset dir="lib">
+          <include name="**/*.jar"/>
+          <include name="**/*.aar"/>
+          <exclude name="*/dx.jar"/>
+          <exclude name="*/apksigner.jar"/>
+        </fileset>
+      </libraryjar>
+
+      <dontnote filter="proguard.configuration.ConfigurationLogger" />
+      <adaptresourcefilecontents filter="proguard/ant/task.properties" />
+    </proguard>
+
+    <delete file="${ExternalComponent-class.dir}/${extensionClassFolder}.jar" />
+    <move file="${ExternalComponent-class.dir}/${extensionClassFolder}_p.jar"
+          tofile="${ExternalComponent-class.dir}/${extensionClassFolder}.jar" />
+  </target>
 
 </project>
