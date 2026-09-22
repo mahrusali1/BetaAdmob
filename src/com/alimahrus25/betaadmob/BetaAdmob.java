@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.google.appinventor.components.annotations.*;
+import com.google.appinventor.components.annotations.androidmanifest.*;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.runtime.*;
 
@@ -33,7 +34,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
     metaDataElements = {
         @MetaDataElement(
             name = "com.google.android.gms.ads.APPLICATION_ID",
-            value = "ca-app-pub-3940256099942544~3347511713"
+            value = "ca-app-pub-3940256099942544~3347511713",
+            resource = ""
         )
     }
 )
