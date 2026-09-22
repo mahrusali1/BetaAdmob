@@ -108,7 +108,7 @@ jobs:
 
         echo ""
         echo "======================================"
-        echo "SEMUA LIBRARY ADMob SELESAI"
+        echo "SEMUA LIBRARY ADMOB SELESAI"
         echo "======================================"
 
         ls -lh
@@ -118,10 +118,11 @@ jobs:
 
     # ==========================================
     # 4. Build Extension
+    #    PROGUARD DIMATIKAN
     # ==========================================
     - name: Build Extension
       run: |
-        ant extensions
+        ant extensions -Dproguard=0
 
 
     # ==========================================
