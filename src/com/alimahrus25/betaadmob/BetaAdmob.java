@@ -6,8 +6,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 import com.google.appinventor.components.annotations.*;
-import com.google.appinventor.components.annotations.androidmanifest.MetaDataElement;
-import com.google.appinventor.components.annotations.androidmanifest.UsesManifests;
 import com.google.appinventor.components.common.ComponentCategory;
 import com.google.appinventor.components.runtime.*;
 
@@ -31,11 +29,11 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
     iconName = "assets/admob.png"
 )
 @SimpleObject(external = true)
-@UsesManifests(
+@UsesApplicationMetadata(
     metaDataElements = {
         @MetaDataElement(
             name = "com.google.android.gms.ads.APPLICATION_ID",
-            value = "ca-app-pub-3940256099942544~3347511713" // Ganti dengan AdMob App ID kamu
+            value = "ca-app-pub-3940256099942544~3347511713"
         )
     }
 )
@@ -52,10 +50,6 @@ public class BetaAdmob extends AndroidNonvisibleComponent {
         this.form = container.$form();
         this.context = container.$context();
     }
-
-    // ==========================================
-    // 1. INITIALIZATION
-    // ==========================================
 
     @SimpleFunction(description = "Inisialisasi AdMob SDK")
     public void InitializeSdk() {
@@ -76,10 +70,6 @@ public class BetaAdmob extends AndroidNonvisibleComponent {
     public void SdkInitialized() {
         EventDispatcher.dispatchEvent(this, "SdkInitialized");
     }
-
-    // ==========================================
-    // 2. BANNER AD
-    // ==========================================
 
     @SimpleFunction(description = "Memuat Banner Ad ke dalam Layout Arrangement")
     public void LoadBanner(final AndroidViewComponent container, final String adUnitId) {
@@ -126,10 +116,6 @@ public class BetaAdmob extends AndroidNonvisibleComponent {
     public void BannerFailedToLoad(String error) {
         EventDispatcher.dispatchEvent(this, "BannerFailedToLoad", error);
     }
-
-    // ==========================================
-    // 3. INTERSTITIAL AD
-    // ==========================================
 
     @SimpleFunction(description = "Memuat iklan Interstitial (Layar Penuh)")
     public void LoadInterstitial(final String adUnitId) {
