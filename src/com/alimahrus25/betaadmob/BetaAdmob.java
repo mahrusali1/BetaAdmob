@@ -26,7 +26,8 @@ import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback;
     version = 1,
     description = "BetaAdmob Engine Extension oleh alimahrus25",
     category = ComponentCategory.EXTENSION,
-    nonVisible = true
+    nonVisible = true,
+    androidMinSdk = 19
 )
 @SimpleObject(external = true)
 @UsesApplicationMetadata(
