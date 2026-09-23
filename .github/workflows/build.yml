@@ -10,138 +10,54 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    # ==========================================
-    # 1. CHECKOUT REPOSITORY
-    # ==========================================
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
 
+      - name: Download AdMob Lite Libraries
+        shell: bash
+        run: |
+          set -e
+          mkdir -p lib/deps
+          cd lib/deps
 
-    # ==========================================
-    # 2. SETUP JAVA 8
-    # ==========================================
-    - name: Set up JDK 8
-      uses: actions/setup-java@v4
-      with:
-        java-version: '8'
-        distribution: 'temurin'
+          # Cukup pakai ads-lite (jangan gabungkan dengan ads full 5MB agar AIX di bawah 5MB)
+          curl -fL --retry 3 "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads-lite/22.6.0/play-services-ads-lite-22.6.0.aar" -o ads-lite.aar
+          unzip -o ads-lite.aar classes.jar
+          mv classes.jar play-services-ads-lite.jar
+          rm ads-lite.aar
 
+          curl -fL --retry 3 "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-basement/18.2.0/play-services-basement-18.2.0.aar" -o basement.aar
+          unzip -o basement.aar classes.jar
+          mv classes.jar play-services-basement.jar
+          rm basement.aar
 
-    # ==========================================
-    # 3. DOWNLOAD ADMOB LIBRARIES
-    # ==========================================
-    - name: Download AdMob Libraries
-      shell: bash
-      run: |
-        set -e
+          curl -fL --retry 3 "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-tasks/18.0.2/play-services-tasks-18.0.2.aar" -o tasks.aar
+          unzip -o tasks.aar classes.jar
+          mv classes.jar play-services-tasks.jar
+          rm tasks.aar
 
-        mkdir -p lib/deps
-        cd lib/deps
+          curl -fL --retry 3 "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads-identifier/18.0.1/play-services-ads-identifier-18.0.1.aar" -o identifier.aar
+          unzip -o identifier.aar classes.jar
+          mv classes.jar play-services-ads-identifier.jar
+          rm identifier.aar
 
-        echo "======================================"
-        echo "Download play-services-ads"
-        echo "======================================"
+          ls -lh
+          cd ../..
 
-        curl -fL --retry 3 \
-          "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads/22.6.0/play-services-ads-22.6.0.aar" \
-          -o ads.aar
+      - name: Build Extension
+        run: |
+          ant extensions -Dproguard=0
 
-        unzip -o ads.aar classes.jar
-        mv classes.jar play-services-ads.jar
-        rm ads.aar
-
-
-        echo "======================================"
-        echo "Download play-services-ads-lite"
-        echo "======================================"
-
-        curl -fL --retry 3 \
-          "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads-lite/22.6.0/play-services-ads-lite-22.6.0.aar" \
-          -o ads-lite.aar
-
-        unzip -o ads-lite.aar classes.jar
-        mv classes.jar play-services-ads-lite.jar
-        rm ads-lite.aar
-
-
-        echo "======================================"
-        echo "Download play-services-basement"
-        echo "======================================"
-
-        curl -fL --retry 3 \
-          "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-basement/18.2.0/play-services-basement-18.2.0.aar" \
-          -o basement.aar
-
-        unzip -o basement.aar classes.jar
-        mv classes.jar play-services-basement.jar
-        rm basement.aar
-
-
-        echo "======================================"
-        echo "Download play-services-tasks"
-        echo "======================================"
-
-        curl -fL --retry 3 \
-          "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-tasks/18.0.2/play-services-tasks-18.0.2.aar" \
-          -o tasks.aar
-
-        unzip -o tasks.aar classes.jar
-        mv classes.jar play-services-tasks.jar
-        rm tasks.aar
-
-
-        echo "======================================"
-        echo "Download play-services-ads-identifier"
-        echo "======================================"
-
-        curl -fL --retry 3 \
-          "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-ads-identifier/18.0.1/play-services-ads-identifier-18.0.1.aar" \
-          -o identifier.aar
-
-        unzip -o identifier.aar classes.jar
-        mv classes.jar play-services-ads-identifier.jar
-        rm identifier.aar
-
-
-        echo ""
-        echo "======================================"
-        echo "ADMOB LIBRARIES SELESAI"
-        echo "======================================"
-
-        ls -lh
-
-        cd ../..
-
-
-    # ==========================================
-    # 4. BUILD EXTENSION
-    # PROGUARD DIMATIKAN
-    # ==========================================
-    - name: Build Extension
-      run: |
-        ant extensions -Dproguard=0
-
-
-    # ==========================================
-    # 5. CEK HASIL AIX
-    # ==========================================
-    - name: Show Generated AIX
-      run: |
-        echo "======================================"
-        echo "GENERATED AIX"
-        echo "======================================"
-
-        ls -lh out/*.aix
-
-
-    # ==========================================
-    # 6. UPLOAD AIX
-    # ==========================================
-    - name: Upload AIX Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: BetaAdmob-Extension
-        path: out/*.aix
+      - name: Upload AIX Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BetaAdmob-Extension
+          path: out/*.aix
